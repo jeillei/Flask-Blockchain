@@ -2,6 +2,7 @@
 
 import json
 from hashlib import sha256
+from typing import Dict
 from time import time
 from smart_contract import SmartContractManager, SmartContract
 
