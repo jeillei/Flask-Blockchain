@@ -49,7 +49,7 @@ class Blockchain(object):
             'sender': sender,
             'recipient': recipient,
             'amount': amount,
-            'timestamp': time.time()
+            'timestamp': time()
         }
 
         if contract_call:
