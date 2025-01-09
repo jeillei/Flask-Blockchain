@@ -4,8 +4,10 @@ from uuid import uuid4
 from flask import Flask, request, jsonify
 from blockchain import Blockchain
 from smart_contract import TokenContract
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 node_identifier = str(uuid4()).replace('-', '')
 
 # Initializing blockchain
