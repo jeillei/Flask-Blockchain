@@ -3,12 +3,14 @@
 import json
 from hashlib import sha256
 from time import time
+from smart_contract import SmartContractManager, SmartContract
 
 
 class Blockchain(object):
     def __init__(self):
         self.chain = []
         self.current_transactions = []
+        self.contract_manager = SmartContractManager()
         self.new_block(previous_hash=1, proof=100)
 
     def proof_of_work(self, last_proof):
@@ -41,18 +43,40 @@ class Blockchain(object):
         self.chain.append(block)
         return block
 
-    def new_transaction(self, sender, recipient, amount):
-        # This function adds a new transaction to already existing transactions
-        # This will create a new transaction which will be sent to the next block.
-        # It will contain three variables including sender, recipient and amount
-        self.current_transactions.append(
-            {
-                'sender': sender,
-                'recipient': recipient,
-                'amount': amount,
+    def new_transaction(self, sender: str, recipient: str, amount: int, contract_call: Dict = None) -> int:
+        transaction = {
+            'sender': sender,
+            'recipient': recipient,
+            'amount': amount,
+            'timestamp': time.time()
+        }
+
+        if contract_call:
+            contract_address = contract_call['address']
+            method = contract_call['method']
+            params = contract_call['params']
+
+            result = self.contract_manager.execute_contract(
+                contract_address,
+                method,
+                params
+            )
+
+            transaction['contract_call'] = {
+                'address': contract_address,
+                'method': method,
+                'params': params,
+                'result': result
             }
-        )
+
+        self.current_transactions.append(transaction)
         return self.last_block['index'] + 1
+
+    def deploy_contract(self, contract: SmartContract, owner: str) -> str:
+        return self.contract_manager.deploy_contract(contract, owner)
+
+    def get_contract(self, address: str) -> SmartContract:
+        return self.contract_manager.get_contract(address)
 
     @staticmethod
     def hash(block):
